@@ -28,11 +28,20 @@ jobs:
         - name: Build with Gradle
           run: ./gradlew -Pversion=${{ github.event.release.tag_name }} build
 
+        - name: Create ZIP file
+          run: zip -r build/release-package.zip build/libs/*.jar scripts
+
         - name: Upload build artifacts
           uses: actions/upload-artifact@v4
           with:
             name: build-artifacts
             path: build/libs/*.jar
+
+        - name: Upload ZIP file
+          uses: actions/upload-artifact@v4
+          with:
+            name: release-package
+            path: build/release-package.zip
 
   release:
     needs: build
@@ -44,7 +53,15 @@ jobs:
           name: build-artifacts
           path: build/libs
 
+      - name: Download ZIP file
+        uses: actions/download-artifact@v4
+        with:
+          name: release-package
+          path: build
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/libs/*.jar
+          files: |
+            build/release-package.zip
+            build/libs/*.jar
