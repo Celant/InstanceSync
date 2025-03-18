@@ -8,6 +8,7 @@ public class Instance {
 	public static class Addon {
 
 		public AddonFile installedFile;
+		public Boolean isEnabled;
 
 		@Override
 		public String toString() {

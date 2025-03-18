@@ -49,6 +49,9 @@ public class DownloadManager {
 			e.printStackTrace();
 		}
 
+		for(Addon a : instance.installedAddons)
+			setModEnabledState(a);
+
 		for(Scan s : instance.cachedScans)
 			acceptableFilenames.add(s.folderName);
 
@@ -60,12 +63,13 @@ public class DownloadManager {
 		if(file == null)
 			return;
 
-		String filenameOnDisk = file.getFileName();
+		String filenameOnDisk = file.getFileName() + (addon.isEnabled ? "" : ".disabled");
 		acceptableFilenames.add(filenameOnDisk);
 
-		File modFile = new File(modsDir, filenameOnDisk);
-		if(!modExists(modFile))
+		if(!modIsDownloaded(addon)) {
+			File modFile = new File(modsDir, filenameOnDisk);
 			download(modFile, file.downloadUrl);
+		}
 	}
 
 	private void download(final File target, final String downloadUrl) {
@@ -119,26 +123,41 @@ public class DownloadManager {
 		}
 	}
 
-	private boolean modExists(File file) {
-		if(file.exists())
+	private boolean modIsDownloaded(Addon addon) {
+		File modFile = new File(modsDir, addon.installedFile.getFileName());
+
+		if (modFile.exists())
 			return true;
 
-		String name = file.getName();
-
-		if(name.endsWith(".disabled"))
-			return swapIfExists(file, name.replaceAll("\\.disabled", ""));
-		else return swapIfExists(file, name + ".disabled");
-	}
-
-	private boolean swapIfExists(File target, String searchName) {
-		File search = new File(modsDir, searchName);
-		if(search.exists()) {
-			System.out.println("Found alt file for " + target.getName() + " -> " + searchName + ", switching filename");
-			search.renameTo(target);
+		modFile = new File(modsDir, addon.installedFile.getFileName() + ".disabled");
+		if (modFile.exists() && !addon.isEnabled)
 			return true;
-		}
 
 		return false;
+	}
+
+	private void setModEnabledState(Addon addon) {
+		if(addon.isEnabled == null) {
+			System.out.println("Addon " + addon.installedFile.getFileName() + " has no enabled state, skipping");
+			return;
+		}
+
+		File file = new File(modsDir, addon.installedFile.getFileName());
+		if (!file.exists()) {
+			file = new File(modsDir, addon.installedFile.getFileName() + ".disabled");
+			if (!file.exists()) {
+				System.out.println("Addon " + file.getName() + " not found, skipping");
+				return;
+			}
+		}
+
+		File desiredFile = new File(modsDir, addon.installedFile.getFileName() + (addon.isEnabled ? "" : ".disabled"));
+		if(file.equals(desiredFile))
+			return;
+
+		System.out.println("Setting enabled state for " + file.getName() + " to " + addon.isEnabled);
+		if (!file.renameTo(desiredFile))
+			System.out.println("Failed to set enabled state for " + file.getName());
 	}
 
 }
