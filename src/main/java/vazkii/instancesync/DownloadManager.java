@@ -18,11 +18,11 @@ import vazkii.instancesync.Instance.Scan;
 public class DownloadManager {
 
 	private final File modsDir;
-	
+
 	private List<String> acceptableFilenames = new LinkedList<>();
-	private ExecutorService executor; 
+	private ExecutorService executor;
 	private int downloadCount;
-	
+
 	public DownloadManager(File modsDir) {
 		this.modsDir = modsDir;
 	}
@@ -48,7 +48,7 @@ public class DownloadManager {
 			System.out.println("Downloads were interrupted!");
 			e.printStackTrace();
 		}
-		
+
 		for(Scan s : instance.cachedScans)
 			acceptableFilenames.add(s.folderName);
 
@@ -74,7 +74,7 @@ public class DownloadManager {
 
 			try {
 				System.out.println("Downloading " + name);
-				long time = System.currentTimeMillis(); 
+				long time = System.currentTimeMillis();
 
 				URL url = new URL(downloadUrl);
 				FileOutputStream out = new FileOutputStream(target);
@@ -109,12 +109,12 @@ public class DownloadManager {
 
 		if(files.length == 0)
 			System.out.println("No mods were removed, woo!");
-		else { 
+		else {
 			for(File f : files) {
 				System.out.println("Found removed mod " + f.getName());
 				f.delete();
 			}
-			
+
 			System.out.println("Deleted " + files.length + " old mods");
 		}
 	}
@@ -122,14 +122,14 @@ public class DownloadManager {
 	private boolean modExists(File file) {
 		if(file.exists())
 			return true;
-		
+
 		String name = file.getName();
-		
+
 		if(name.endsWith(".disabled"))
 			return swapIfExists(file, name.replaceAll("\\.disabled", ""));
 		else return swapIfExists(file, name + ".disabled");
 	}
-	
+
 	private boolean swapIfExists(File target, String searchName) {
 		File search = new File(modsDir, searchName);
 		if(search.exists()) {
@@ -137,8 +137,8 @@ public class DownloadManager {
 			search.renameTo(target);
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 }
