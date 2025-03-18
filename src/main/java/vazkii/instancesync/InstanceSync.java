@@ -7,11 +7,9 @@ import java.io.IOException;
 import com.google.gson.Gson;
 
 public final class InstanceSync {
-	
-	private static final String VERSION = "1.0.2";
 
 	public static void main(String[] args) {
-		System.out.println("InstanceSync " + VERSION);
+		System.out.println("InstanceSync " + InstanceSync.class.getPackage().getImplementationVersion());
 		
 		long time = System.currentTimeMillis();
 		File dir = new File(".");
